@@ -38,10 +38,16 @@
 			$(document).ready(function(){
   			$(".submit").click(function(){
 					var toAdd = $('input').val();
-					
-					gun.get('lists').set(toAdd);
-					
-					$('input').val('');
+					if (toAdd.includes('<script>')) {
+						alert("Stop, silly kid. I'm going to call the FBI if you don't...")
+						alert("If you do so, you'll get a cake.")
+						while (true){
+							alert('Take your cake.')
+						}
+					} else if (!toAdd.includes('<script>')) {
+						gun.get('lists').set(toAdd);
+						$('input').val('');
+					}
   			});
 				
 				$('#clear').click(function() {
@@ -52,12 +58,10 @@
 				gun.get('lists').map().on(function(data, key) {
 					data_fetched = data;
 					$('ul').append('<li id="' + key + '"><a class="link" href=' + data + '"' + '>' + data + '</a><button class="load">Load</button></li>');
-				
 				})
 
 				$(document).on('click', '.load', function () {
 					let magnet = $(this).parent().text().split('Load')[0]
-					alert(magnet)
 					client.add(magnet, function(torrent) {
 						
 						// $('.remaining').text(moment.duration(torrent.timeRemaining / 1000, 'seconds'))
