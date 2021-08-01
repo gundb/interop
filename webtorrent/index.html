@@ -56,7 +56,7 @@
 				})
 
 				$(document).on('click', '.load', function () {
-					let magnet = $(this).parent().text().trim();
+					let magnet = $(this).parent().text().split('Load')[0]
 					alert(magnet)
 					client.add(magnet, function(torrent) {
 						
