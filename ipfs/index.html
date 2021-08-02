@@ -1,1 +1,51 @@
-...add demo here...
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GUN + IPFS</title>
+</head>
+
+<body>
+
+    <div>
+        <p>Uploaded files</p>
+        <ul id="files"></ul>
+    </div>
+    <p>Status: <span id="status"></span></p>
+    <input id="file" type="file">
+
+
+</body>
+<script src="https://cdn.jsdelivr.net/npm/ipfs/dist/index.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gun/lib/upload.js"></script>
+<script type="text/javascript">
+    $(document).ready(async function () {
+        var gun = Gun("http://localhost:8765/gun");
+        var video = { data: null };
+        const ipfs = await Ipfs.create({ repo: 'ipfs-' + Math.random() })
+        var status = ipfs.isOnline() ? 'online' : 'offline'
+        $('#status').text(status)
+        async function uploadFile(e) {
+            const file = e.target.files[0]
+            console.log(file.name)
+            const added = await ipfs.add(file, { progress: (prog) => console.log(prog) })
+            gun.get('uploads').set({ name: file.name, hash: added.cid.toString() })
+
+        }
+
+        gun.get('uploads').map().on((data) => {
+            $("#files").append(`<li id="${data.hash}"><a href="https://ipfs.io/ipfs/${data.hash}">${data.name}</a></li>`)
+            console.log(`https://ipfs.io/ipfs/${data.hash}`)
+        })
+        const file = $("#file")
+        file.on('change', uploadFile)
+
+    })
+</script>
+
+</html>
