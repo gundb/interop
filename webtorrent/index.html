@@ -36,7 +36,7 @@
 			}
 			
 			$(document).ready(function(){
-  			$(".submit").click(function(){
+ 				$(".submit").click(function(){
 					var toAdd = $('input').val();
 					if (toAdd.includes('<script>')) {
 						alert("Stop, silly kid. I'm going to call the FBI if you don't...")
@@ -48,7 +48,7 @@
 						gun.get('lists').set(toAdd);
 						$('input').val('');
 					}
-  			});
+ 				});
 				
 				$('#clear').click(function() {
 					window.localStorage.clear();
@@ -62,6 +62,7 @@
 
 				$(document).on('click', '.load', function () {
 					let magnet = $(this).parent().text().split('Load')[0]
+					
 					client.add(magnet, function(torrent) {
 						
 						// $('.remaining').text(moment.duration(torrent.timeRemaining / 1000, 'seconds'))
@@ -83,14 +84,14 @@
 						
 						function prettyBytes(num) {
 							var exponent, unit, neg = num < 0, units = ['B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
-  						if (neg) num = -num
-        			if (num < 1) return (neg ? '-' : '') + num + ' B'
+  							if (neg) num = -num
+ 							if (num < 1) return (neg ? '-' : '') + num + ' B'
         			
 							exponent = Math.min(Math.floor(Math.log(num) / Math.log(1000)), units.length - 1)
-       	 			num = Number((num / Math.pow(1000, exponent)).toFixed(2))
-        			unit = units[exponent]
-        			return (neg ? '-' : '') + num + ' ' + unit
-      			}
+				 			num = Number((num / Math.pow(1000, exponent)).toFixed(2))
+ 							unit = units[exponent]
+	 						return (neg ? '-' : '') + num + ' ' + unit
+  						}
 						
 						file.appendTo('#output')
 					})
