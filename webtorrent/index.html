@@ -18,7 +18,7 @@
 		gun = Gun(), client = new WebTorrent();
 
 		gun.get('test').get('torrent').on(function(data, key){
-			client.add(paste.value = data || paste.value, stream);
+			client.add(paste.value = data, stream);
 		});
 
 		paste.onkeyup = function(){
