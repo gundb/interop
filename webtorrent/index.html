@@ -26,7 +26,7 @@
 		};
 
 		function stream(torrent){
-			file = torrent.files.find(function(file){ return file.name.endsWith('.mp4') });
+			file = torrent.files.find(function(file){ return file.name.endsWith('.mp4' || '.mkv') });
 			file.appendTo('#output', {autoplay: true, muted: true});
 
 			setTimeout(function progress() { // useful stats but not needed for demo:
