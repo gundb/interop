@@ -11,7 +11,7 @@
 <body>
 
     <p>IPFS Node: <span id="status"></span></p>
-    <input id="file" type="file" accept="video/mp4,video/x-m4v,video/*">
+    <!-- <div id="file" style="width: 100%; height: 300px; background: #cacaca"></div> -->
     <video id="video" controls>
         Your browser does not support the video tag.
     </video>
@@ -21,21 +21,40 @@
 <script src="https://cdn.jsdelivr.net/npm/ipfs/dist/index.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gun/lib/upload.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/hlsjs-ipfs-loader@0.3.0/dist/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@0.14.17"></script>
+
 <script type="text/javascript">
     $(document).ready(async function () {
+
+
         var gun = Gun();
         const ipfs = await Ipfs.create({ repo: 'ipfs-' + Math.random() })
         var status = ipfs.isOnline() ? 'online' : 'offline'
         $('#status').text(status)
-        async function uploadFile(e) {
-            const file = e.target.files[0]
+        async function uploadFile(file) {
             const added = await ipfs.add(file, { progress: (prog) => console.log(prog) })
-            gun.get('upload').put({ name: file.name, hash: added.cid.toString() })
-
+            gun.get('upload').put({ hash: added.cid.toString() })
         }
 
-        gun.get('upload').on((data) => {
-            $('#video').attr('src', `https://ipfs.io/ipfs/${data.hash}`)
+        $("body").upload(function (e) {
+            var b64 = (((e.event || e).target || e).result || e)
+            console.log(b64)
+            uploadFile(b64)
+        })
+
+        gun.get('upload').on(async (data) => {
+            let videoData = ''
+
+            const stream = ipfs.cat(data.hash)
+            console.log("loading")
+            for await (const chunk of stream) {
+                videoData += chunk.toString()
+            }
+            console.log("done")
+            $("#video").get(0).src = videoData
+
         })
         const file = $("#file")
         file.on('change', uploadFile)
