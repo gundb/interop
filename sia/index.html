@@ -1,1 +1,48 @@
-...add demo here...
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GUN + SIA</title>
+</head>
+
+<body>
+
+    <input id="file" type="file" accept="video/mp4,video/x-m4v,video/*">
+    <video id="video" controls>
+        Your browser does not support the video tag.
+    </video>
+
+
+</body>
+<script src="https://skynet-js.hns.siasky.net/4.0-beta/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="module">
+    $(document).ready(async function () {
+        var gun = Gun();
+        const client = new window.skynet.SkynetClient();
+
+        function uploadFile(e) {
+            const file = e.target.files[0]
+            client.uploadFile(file).then((res) => {
+                gun.get('upload').put({ name: file.name, skylink: res.skylink })
+            }).catch(err => {
+                console.log(err)
+            })
+
+        }
+        gun.get('upload').on((data) => {
+            client.downloadFile(data["skylink"]).then(url => {
+                $('#video').attr('src', url)
+            }).catch(err => console.log(err))
+
+        })
+        const file = $("#file")
+        file.on('change', uploadFile)
+
+    })</script>
+
+</html>
