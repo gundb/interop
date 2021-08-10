@@ -1,1 +1,555 @@
-...add demo here...
+<!DOCTYPE html> 
+<html lang="en">
+	<head>
+
+		<title>Bitcoin Wallet by Coinb.in</title>
+
+		<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+		<meta name="keywords" content="bitcoin, wallet, multisig, multisignature, address, browser, segwit, javascript, js, broadcast, transaction, verify, decode" />
+		<meta name="description" content="A Bitcoin Wallet written in Javascript. Supports Multisig, SegWit, Custom Transactions, nLockTime and more!" />
+
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+		<link rel="stylesheet" href="css/bootstrap.min.css" media="screen">
+		<link rel="stylesheet" href="css/bootstrap-datetimepicker.min.css">
+		<link rel="stylesheet" href="css/style.css" media="screen">
+		
+		<script type="text/javascript" src="js/jquery-1.9.1.min.js"></script>
+		<script type="text/javascript" src="js/moment.min.js"></script>
+		<script type="text/javascript" src="js/transition.js"></script>
+		<script type="text/javascript" src="js/collapse.js"></script>
+
+		<script type="text/javascript" src="js/bootstrap.min.js"></script>
+		<script type="text/javascript" src="js/bootstrap-datetimepicker.min.js"></script>
+
+		<script type="text/javascript" src="js/crypto-min.js"></script>
+		<script type="text/javascript" src="js/crypto-sha256.js"></script>
+		<script type="text/javascript" src="js/crypto-sha256-hmac.js"></script>
+		<script type="text/javascript" src="js/sha512.js"></script>
+		<script type="text/javascript" src="js/ripemd160.js"></script>
+		<script type="text/javascript" src="js/aes.js"></script>
+
+		<script type="text/javascript" src="js/qcode-decoder.min.js"></script>
+		<script type="text/javascript" src="js/jsbn.js"></script>
+		<script type="text/javascript" src="js/ellipticcurve.js"></script>
+
+		<script type="text/javascript" src="js/coin.js"></script>
+		<script type="text/javascript" src="js/coinbin.js"></script>
+
+		<script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/gun/sea.js"></script>
+
+
+		<script>
+			var gun = Gun('https://mvp-gun.herokuapp.com/gun');
+			var user = gun.user();
+		</script>
+
+	</head>
+
+	<body>
+		<div id="wrap">
+			<!-- Fixed navbar -->
+	
+
+			<div id="content" class="container">
+
+
+				<div class="tab-content">
+					<div class="tab-pane tab-content active" id="home">
+						
+						<a href="#wallet">wallet</a>
+						<p>excuse bloat. Made using <a href="coinb.in">Coinb.in</a> and <a href="era.eco">Gun</a></p>
+					</div>
+
+					<div class="tab-pane tab-content" id="wallet">
+						<div class="container">
+							<div class="columns twelve">
+								<div style=" margin: auto; ">
+									<form id="sign">
+										
+										<div class="" style="display:flex">
+											<div class="button-container" style="margin: auto;">
+												<div class='button -regular center' style="width: fit-content;"><input style="width: 48%" class="borderLess" id="alias" placeholder="alias"><input style="margin-left: 4%; width:48%" class="borderLess" id="pass" type="password" placeholder="password"></div>
+											</div>
+										</div>
+										<div class="" style="display:flex">
+											<div class="button-container" style="margin: auto;">
+												<div class='button -regular center cena' style="width: fit-content;"><input class="borderless" id="in" type="submit" value="sign in" style="    background-color: #ffffff00;"><input style="margin-left: 2em;     background-color: #ffffff00;" class="borderless" id="up" type="button" value="sign up"></div>
+											</div>
+										</div>
+
+									</form>
+								</div>
+							</div>
+						</div>		
+						<div id="openWallet" class="hidden" >
+							<div class="" id="rest">
+								<div class="container">
+									<div class="columns twelve" style="box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px; padding: 1em; border-radius: 10px">
+										<div class="">
+											<p><span style="float:right;"><a href="javascript:;" id="walletLogout">Logout</a></span></p>
+										</div>
+										<div class="" align="center" style="   padding: 1em;margin-top: 1em;border-radius: 10px; overflow: hidden">
+										
+												<span id="walletLoader" class="hidden"><img src="images/loader.gif"></span>
+												<div id="walletAddress" style="font-size: 1.4em;     width: 100%;
+												overflow-x: scroll;"></div>
+												<br><br>
+												<div style="text-align:center;">
+													<ul class="nav nav-pills" role="tablist">
+														<li role="presentation" class="active"><a href="javascript:;" id="walletBalance">0.00 BTC</a></li>
+														<li role="presentation"><a href="javascript:;" id="walletShowSpend">Spend</a></li>
+														<li role="presentation"><a id="walletHistory" href="javascript:;" target="_blank">History</a></li>
+														<li role="presentation"><a href="javascript:;" id="walletShowKeys">Keys</a></li>
+													</ul>
+
+
+											
+
+												<div>
+											
+											</div>
+
+												<div id="walletKeys" class="hidden">
+													<label>Public Key</label>
+													<input class="form-control pubkey" type="text" readonly>
+													<label>Private key</label>
+													<div class="input-group">
+														<input class="form-control privkey" type="password" readonly>
+
+														<span class="input-group-btn">
+															<button class="showKey btn btn-default" type="button">Show</button>
+														</span>
+													</div>
+													<label>Private Key (AES256 encrypted key)</label>
+													<input class="form-control privkeyaes" type="text" readonly>
+												</div>
+
+												<div id="walletSpend" class="hidden">
+													<div class="row slim">
+														<div class="form-inline output">
+															<div class="col-xs-8">
+																<label>Address</label>
+															</div>
+
+															<div class="col-xs-3">
+																<label>Amount</label>
+															</div>
+														</div>
+													</div>
+
+													<div class="row slim" id="walletSpendTo">
+														<div class="form-horizontal output">
+															<div class="col-xs-8">
+																<input type="text" class="form-control addressTo" data-original-title="" title="">
+															</div>
+															<div class="col-xs-3">
+																<input type="text" class="form-control amount" data-original-title="" title="" placeholder="0.00">
+
+															</div>
+
+															<a href="javascript:;" class="addressAdd"><span class="glyphicon glyphicon-plus"></span></a>
+															<br><br>
+														</div>
+													</div>
+													<div class="row">
+														<div class="col-xs-6">
+															<label><abbr title="the amount to pay in network miner fees - 0.0001 or more recommended">Transaction Fee</abbr></label>
+															<input type="text" class="form-control" value="0.00001" id="txFee">
+														</div>
+														<div class="col-xs-5">
+															<input style="display: none;" type="text" class="form-control" value="0.000" id="developerDonation">
+														</div>
+													
+													</div>
+													<br>
+
+													<div id="walletSendStatus" class="alert alert-danger hidden"></div>
+
+													<button class="btn" type="button" id="walletSendBtn">Send</button>
+													<button class="btn btn-default" type="button">Reset</button>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+	
+
+					<div class="tab-pane tab-content" id="fees">
+						<h2>Bitcoin Fee Calculator</h2>
+						<p>This page will give you a guide on the lowest fee to use to get your transaction included within the next few blocks. It works by predicting the size of a transaction and comparing it to another transaction in a recent block to determine an appropriate fee.</p>	
+
+						<div align="center" class="alert alert-info">
+							<h2><span class="glyphicon glyphicon-question-sign"></span> Recommended Fee: <span class="recommendedFee">0.00000000</span> BTC <small> <br> for a transaction of <span class="feeTxSize">0</span> bytes</small></h2>
+							<span class="text-muted"><i><span class="feeSatByte">?</span> Sat/Byte</i></span>
+						</div>
+
+						<div id="txsliders" class="row">
+							<div class="col-md-6 txinputs">
+
+								<div align="center"><b><span class="txtotal total">0</span><br>Inputs</b></div>
+								<div id="txinputstype" align="center" class="small text-muted">
+									<br>
+									<span><span class="txsize">0</span> Bytes</span>
+								</div>
+
+								<h4 class="regular"><abbr title="Spending from a compressed legacy address. p2pkh">Regular</abbr> <small>Compressed</small> 
+									<span class="badge inputno" title="Number of Regular Inputs">1</span> 
+									<small><span class="bytes">148</span> bytes</small>
+									<small class="estimate hidden"><em> *estimate</em></small>
+								</h4> 
+
+								<div class="input-group">
+									<span class="input-group-btn"><button class="btn sliderbtn down" type="button"><span class="glyphicon glyphicon-chevron-left"></span></button></span>
+									<input type="range" min="0" max="100" value="1" class="slider txinput txi_regular" rel="regular">
+									<span class="input-group-btn"><button class="btn sliderbtn up" type="button"><span class="glyphicon glyphicon-chevron-right"></span></button></span>
+								</div>
+
+								<h4 class="segwit"><abbr title="Spending from a segwit address. p2sh">SegWit</abbr> 
+									<span class="badge inputno" title="Number of SegWit Inputs">0</span>
+									<small><span class="bytes">0</span> bytes</small>
+									<small class="estimate hidden"><em> *estimate</em></small>
+								</h4> 
+
+								<div class="input-group">
+									<span class="input-group-btn"><button class="btn sliderbtn down" type="button"><span class="glyphicon glyphicon-chevron-left"></span></button></span>
+									<input type="range" min="0" max="100" value="0" class="slider txinput txi_segwit" rel="segwit">
+									<span class="input-group-btn"><button class="btn sliderbtn up" type="button"><span class="glyphicon glyphicon-chevron-right"></span></button></span>
+								</div>
+
+								<h4 class="multisig"><abbr title="Spending from a multisig address. p2sh">MultiSig</abbr>  
+									<span class="badge inputno" title="Number of MultiSig Inputs">0</span>
+									<small><span class="bytes">0</span> bytes</small>
+									<small class="estimate hidden"><em> *estimate</em></small>
+								</h4> 
+
+								<div class="input-group">
+									<span class="input-group-btn"><button class="btn sliderbtn down" type="button"><span class="glyphicon glyphicon-chevron-left"></span></button></span>
+									<input type="range" min="0" max="100" value="0" class="slider txinput txi_multisig" rel="multisig">
+									<span class="input-group-btn"><button class="btn sliderbtn up" type="button"><span class="glyphicon glyphicon-chevron-right"></span></button></span>
+								</div>
+
+								<h4 class="hodl"><abbr title="Spending from a time locked address. p2sh">Hodl</abbr> <small>Time Locked</small> 
+									<span class="badge inputno" title="Number of Hodl Inputs">0</span>
+									<small><span class="bytes">0</span> bytes</small>
+									<small class="estimate hidden"><em> *estimate</em></small>
+								</h4>
+
+								<div class="input-group">
+									<span class="input-group-btn"><button class="btn sliderbtn down" type="button"><span class="glyphicon glyphicon-chevron-left"></span></button></span>
+									<input type="range" min="0" max="100" value="0" class="slider txinput txi_hodl" rel="hodl">
+									<span class="input-group-btn"><button class="btn sliderbtn up" type="button"><span class="glyphicon glyphicon-chevron-right"></span></button></span>
+								</div>
+
+								<h4 class="unknown"><abbr title="Spending from an unrecognized input. p2sh">Unknown</abbr> 
+									<span class="badge inputno" title="Number of Unknown Inputs">0</span>
+									<small><span class="bytes">0</span> bytes</small>
+									<small class="estimate hidden"><em> *estimate</em></small>
+								</h4>
+
+								<div class="input-group">
+									<span class="input-group-btn"><button class="btn sliderbtn down" type="button"><span class="glyphicon glyphicon-chevron-left"></span></button></span>
+									<input type="range" min="0" max="100" value="0" class="slider txinput txi_unknown" rel="unknown">
+									<span class="input-group-btn"><button class="btn sliderbtn up" type="button"><span class="glyphicon glyphicon-chevron-right"></span></button></span>
+								</div>
+
+								<br>
+							</div>
+
+							<div class="col-md-6 txoutputs">
+
+								<div align="center"><b><span class="txtotal total">0</span><br>Outputs</b></div>
+								<div id="txoutputtype" align="center" class="small text-muted">
+									<br>
+									<span><span class="txsize">0</span> Bytes</span>
+								</div>
+
+								<h4 class="p2pkh"><abbr title="A pay 2 public key hash. Starts with 1. Used with legacy addresses">Regular</abbr> <small>p2pkh (1...)</small> 
+									<span class="badge outputno" title="Number of p2pkh Outputs">2</span> 
+									<small><span class="bytes">68</span> bytes</small>
+									<small class="estimate hidden"><em> *estimate</em></small>
+								</h4>	 
+
+								<div class="input-group">
+									<span class="input-group-btn"><button class="btn sliderbtn down" type="button"><span class="glyphicon glyphicon-chevron-left"></span></button></span>
+									<input type="range" min="0" max="100" value="2" class="slider txoutput txo_p2pkh" rel="p2pkh">
+									<span class="input-group-btn"><button class="btn sliderbtn up" type="button"><span class="glyphicon glyphicon-chevron-right"></span></button></span>
+								</div>
+
+								<h4 class="p2sh"><abbr title="A pay 2 script hash address. Starts with a 3. For example a segwit or multisig address">Regular</abbr> <small>p2sh (3...)</small> 
+									<span class="badge outputno" title="Number of p2sh Outputs">0</span> 
+									<small><span class="bytes">0</span> bytes</small>
+									<small class="estimate hidden"><em> *estimate</em></small>
+								</h4> 
+
+								<div class="input-group">
+									<span class="input-group-btn"><button class="btn sliderbtn down" type="button"><span class="glyphicon glyphicon-chevron-left"></span></button></span>
+									<input type="range" min="0" max="100" value="0" class="slider txoutput txo_p2sh" rel="p2sh">	
+									<span class="input-group-btn"><button class="btn sliderbtn up" type="button"><span class="glyphicon glyphicon-chevron-right"></span></button></span>
+								</div>
+
+								<br>
+							</div>
+						</div>
+
+						<br>
+
+						<div class="row">
+							<div class="col-md-12">
+								<div class="text-muted">Chargable Transaction Size: <span class="feeTxSize">0</span> bytes</div>
+							</div>
+						</div>
+
+						<hr>
+
+						<div class="row">
+							<div class="col-md-12 recommended">
+
+								<h3>Blockchain Data <span class="pull-right"><button type="button" id="feeStatsReload" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-refresh"></span></button></span></h3>
+
+								<p>This is based on us comparing your transaction against a very recent transaction found in a very recent block</p>
+								<p><b>Block Height</b>: <span class="blockHeight">?</span></p>
+								<p class="hideOverflow"><b>Block #</b>: <span class="blockHash">?</span></p>
+								<p><b>Block Time</b>: <span class="blockTime">?</span> <span class="blockDateTime text-muted"></span></p>
+								<p class="hideOverflow"><b>Transaction ID</b>: <span class="txId">?</span></p>
+								<p><b>Transaction Size</b>: <span class="txSize">0</span> bytes</p>
+								<p><b>Transaction Fee</b>: <span class="txFee">0.00000000</span></p>
+								<p><b>Satoshi per Byte</b>: <span class="feeSatByte">0</span></p>
+
+								<p>Based on your data and this recently mined transaction we recommend a fee of <b><span class="recommendedFee">0.00000000</span> BTC</b> to get it into the next few blocks</p>
+							</div>
+						</div>
+
+						<br>
+
+						<div class="row">
+
+							<div class="col-md-12">
+								<a href="javascript:;" id="advancedFeesCollapse">
+									<div class="well well-sm"><span class="glyphicon glyphicon-collapse-down"></span> Advanced Options &amp; Raw Transaction</div>
+								</a>
+							</div>
+						</div>
+
+						<div class="row hidden" id="advancedFees">
+							<div class="col-md-12">
+								<p>Enter your unsigned or signed hex encoded transaction below:</p>
+								<textarea class="form-control txhex" style="height:160px"></textarea><br>
+								<button type="button" class="btn btn-primary" id="feesAnalyseBtn">Analyse Transaction</button>
+
+								<hr>
+
+								<h4>Estimate Input Size <small>in bytes</small></h4>
+
+								<div class="form-inline">
+									<div class="form-group">
+										<label for="est_txi_regular">Regular</label>
+										<input type="number" class="form-control" id="est_txi_regular" value="107">
+									</div>
+									<div class="form-group">
+										<label for="est_txi_segwit">SegWit</label>
+										<input type="number" class="form-control" id="est_txi_segwit" value="27">
+									</div>
+									<div class="form-group">
+										<label for="est_txi_multisig">MultiSig</label>
+										<input type="number" class="form-control" id="est_txi_multisig" value="351">
+									</div>
+									<div class="form-group">
+										<label for="est_txi_hodl">Hodl</label>
+										<input type="number" class="form-control" id="est_txi_hodl" value="78">
+									</div>
+									<div class="form-group">
+										<label for="est_txi_unknown">Unknown</label>
+										<input type="number" class="form-control" id="est_txi_unknown" value="512">
+									</div>
+								</div>
+
+								<h4>Estimate Output Size <small> in bytes</small></h4>
+								<div class="form-inline">
+									<div class="form-group">
+										<label for="est_txo_p2pkh">Regular P2PKH</label>
+										<input type="number" class="form-control" id="est_txo_p2pkh" value="25">
+									</div>
+										<div class="form-group">
+										<label for="est_txo_p2sh">Regular P2SH</label>
+										<input type="number" class="form-control" id="est_txo_p2sh" value="23">
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+
+	
+
+					<br>
+					<br>
+
+				</div>
+			</div>
+		</div>
+
+
+	<!-- wallet confirm send modal -->
+	<div class="modal fade" id="modalWalletConfirm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+				<h4 class="modal-title">Please confirm</h4>
+				</div>
+
+				<div class="modal-body">
+					<p>You are about to send a transaction to the value of <span id="spendAmount">0.00</span> BTC</p>
+
+					<br>
+					<div id="walletSendConfirmStatus" class="alert alert-danger hidden"></div>
+
+					<div id="walletSendFailTransaction" class="alert alert-info hidden">
+						<b>Raw Transaction:</b>
+						<p>Below is a copy of the transaction we tried to submit</p>
+						<textarea class="form-control" readonly></textarea>
+					</div>
+				</div>
+
+				<div class="modal-footer">
+					<button type="button" class="btn btn-primary" id="walletConfirmSend">Send</button>
+					<button type="button" class="btn btn-default" data-dismiss="modal" id="confirmClose">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- wallet confirm send modal -->
+
+	<!-- qrcode modal -->
+	<div class="modal fade" id="modalQrcode" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+				<h4 class="modal-title">qrcode</h4>
+				</div>
+
+				<div class="modal-body" align="center">
+					<div id="qrcode"></div>
+				</div>
+
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal" id="qrCodeClose">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- qrcode modal -->
+
+	<!-- qrcode scanner modal -->
+	<div class="modal fade" id="modalQrcodeScanner" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+				<h4 class="modal-title">qrcode scanner</h4>
+				</div>
+
+				<div class="modal-body" align="center">
+					<select id="videoSource" class="form-control"></select>
+					<div id="videoReaderError" class="hidden">Your browser does not offer camera support</div>
+					<video id="videoReader" muted autoplay style="width:100%;height:100%"></video>
+					<div id="qrcode-scanner-callback-to" class="hidden"></div>
+				</div>
+
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal" id="qrScanClose">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- qrcode scanner modal -->
+
+	<!-- mediator modal -->
+	<div class="modal fade" id="modalMediator" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					<h4 class="modal-title">Transaction Mediation</h4>
+				</div>
+
+				<div class="modal-body">
+					<p>You can add a public key when creating a <i>2-of-3 multi signature address</i> and for a low fee your mediator will help with the recovery of the funds should any disputes arise.</p>
+
+					<p>Should a dispute arise please contact the below address for further information</p>
+					<div class="row">
+						<div class="col-md-5">
+							<label>Mediator:</label>
+
+							<!-- 
+								You need to contact us before adding your pubkey 
+								and submitting a pull request on github. 
+
+								format is: pubkey;email;fee
+							-->
+
+							<select id="mediatorList" class="form-control">
+								<option value="02b6231cc602740c29436eafbb6448880f4058cc3d2745c709deee313104678277;support@coinb.in;1">Coinb.in</option>
+							</select>
+						</div>
+
+						<div class="col-md-5">
+							<label>Address:</label> <span class="text-muted">(for disputes)</span>
+							<input id="mediatorEmail" type="text" class="form-control address" value="" readonly>	
+						</div>
+
+						<div class="col-md-2">
+							<label>Fee (%):</label> 
+							<input id="mediatorFee" type="text" class="form-control address" value="" readonly>	
+						</div>
+
+					</div>
+					<br>
+
+					<label>Public Key:</label>
+					<input id="mediatorPubkey" type="text" class="form-control address" value="" readonly>
+					<br>
+				</div>
+
+				<div class="modal-footer">
+					<button class="btn btn-primary" type="button" id="mediatorAddKey">Add Public Key</button>
+					<button type="button" class="btn btn-default" data-dismiss="modal" id="mediatorClose">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- mediator modal -->
+
+
+	<!-- warning (fee) modal -->
+	<div class="modal fade" id="modalWarningFee" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					<h4 class="modal-title"><b>Warning High Fee!</b></h4>
+				</div>
+
+				<div class="modal-body">
+					Please be aware that you have created a transaction with what seems to be a very high fee of <span id="modalWarningFeeAmount"></span> BTC!
+				</div>
+
+				<div class="modal-footer">
+					<button type="button" class="btn btn-primary" data-dismiss="modal" id="warningFeeClose">OK, I've got it!</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- warning (fee) modal -->
+
+	<div class="hidden" id="entropybucket"></div>
+	</body>
+</html>
